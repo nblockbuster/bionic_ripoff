@@ -1,6 +1,7 @@
 from array import array
 import re
 import math
+import sys
 
 def round_up(n, decimals=0):
     multiplier = 10 ** decimals
@@ -8,52 +9,55 @@ def round_up(n, decimals=0):
 
 def Split(input: str):
     InputString = input
-    Words = re.split('(\W)', InputString)
-    print(Words)
+    Words = re.split('([^a-zA-Z0-9_!"#$%&\'()*+,\-.\/:;<=>?@[\]^_`{|}~])', InputString)
     return Words
 
-def Bold(word_arr: array):
+def Bold(word_arr: array, style: str):
     BoldArr = []
-    PrevWordIsSpace = ' '
+    PrevWord = ' '
+    BoldChar = "<b>"
+    UnboldChar ="</b>"
+    if style == "markdown":
+        BoldChar = "**"
+        UnboldChar ="**"
     for word in word_arr:
-        print("Current Word:", word)
-        if re.fullmatch('(\W)', word):
-            PrevWordIsSpace = ' '
-            print("Word in arr not a word, skipping")
+        if re.fullmatch('(\s)', word):
+            PrevWord = ' '
             continue
         if len(word) <= 3:
-            print("Current Word is <= 3 Characters.")
             firstChar = word[0]
             restOfWord = word[1:]
-            print(firstChar + "+" + restOfWord)
-            BoldWord = f"<b>{firstChar}</b>{restOfWord}"
-            if PrevWordIsSpace is ' ':
-                BoldWord += ' '
-            print(BoldWord)
+            BoldWord = f"{BoldChar}{firstChar}{UnboldChar}{restOfWord}"
+            BoldWord += PrevWord
             BoldArr.append(BoldWord)
         else:
-            print("Current Word is >= 4 Characters")
             boldAmount = int(round_up(len(word)/2))
-            print("Amount of characters to be bolded: ", boldAmount)
             boldedChars = word[:boldAmount]
             restOfWord = word[boldAmount:]
-            print(boldedChars + "+" + restOfWord)
-            BoldWord = f"<b>{boldedChars}</b>{restOfWord}"
-            if PrevWordIsSpace is ' ':
-                BoldWord += ' '
-            print(BoldWord)
+            BoldWord = f"{BoldChar}{boldedChars}{UnboldChar}{restOfWord}"
+            BoldWord += PrevWord
             BoldArr.append(BoldWord)
     return BoldArr
-def Combine():
-    return    
-InputStr = "Bionic Reading is a new"
-StrArr = Split(InputStr)
-BoldendArr = Bold(StrArr)
 
-print(BoldendArr)
+def Combine(BoldendArr: array):
+    OutputStr = ""
+    for BoldWord in BoldendArr:
+        OutputStr += BoldWord
+    return OutputStr
 
-OutputStr = ""
-for BoldWord in BoldendArr:
-    OutputStr += BoldWord
+def main():
+    BoldStyle = "html"
+    if len(sys.argv) == 1:
+        print("No arguments provided.")
+        print("You must provide an input string.")
+        exit(1)
+    if len(sys.argv) > 2:
+        BoldStyle = sys.argv[2]
+    InputStr = sys.argv[1]
+    StrArr = Split(InputStr)
+    BoldendArr = Bold(StrArr, BoldStyle)
+    OutputStr = Combine(BoldendArr)
+
+    print(OutputStr)
     
-print(OutputStr)
+main()
