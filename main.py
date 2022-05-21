@@ -3,13 +3,17 @@ import re
 import math
 import sys
 
+regex_pattern = '([^a-zA-Z0-9_!"#$%&\'()*+,\-.\/:;<=>?@[\]^_`{|}~])'
+
+symbol_regex_pattern = "([_!\"#$%&'()*+,\-.\\\/:;<=>?@[\]^_`{|}~])"
+
 def round_up(n, decimals=0):
     multiplier = 10 ** decimals
     return math.ceil(n * multiplier) / multiplier
 
 def Split(input: str):
     InputString = input
-    Words = re.split('([^a-zA-Z0-9_!"#$%&\'()*+,\-.\/:;<=>?@[\]^_`{|}~])', InputString)
+    Words = re.split(regex_pattern, InputString)
     return Words
 
 def Bold(word_arr: array, style: str):
@@ -25,16 +29,27 @@ def Bold(word_arr: array, style: str):
             PrevWord = ' '
             continue
         if len(word) <= 3:
-            firstChar = word[0]
-            restOfWord = word[1:]
+            i = 0
+            firstChar = word[i]
+            if re.fullmatch(symbol_regex_pattern, firstChar):
+                i+=1
+            restOfWord = word[(i+1):]
             BoldWord = f"{BoldChar}{firstChar}{UnboldChar}{restOfWord}"
             BoldWord += PrevWord
             BoldArr.append(BoldWord)
         else:
             boldAmount = int(round_up(len(word)/2))
-            boldedChars = word[:boldAmount]
-            restOfWord = word[boldAmount:]
-            BoldWord = f"{BoldChar}{boldedChars}{UnboldChar}{restOfWord}"
+            firstChar = word[0]
+            Unbolded_Char = ""
+            if re.fullmatch(symbol_regex_pattern, firstChar):
+                Unbolded_Char = word[:1]
+                boldedChars = word[1:(boldAmount)]
+                restOfWord = word[(boldAmount):]
+                print(UnboldChar, boldedChars, restOfWord)
+            else:
+                boldedChars = word[:boldAmount]
+                restOfWord = word[boldAmount:]
+            BoldWord = f"{Unbolded_Char}{BoldChar}{boldedChars}{UnboldChar}{restOfWord}"
             BoldWord += PrevWord
             BoldArr.append(BoldWord)
     return BoldArr
